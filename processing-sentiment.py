@@ -58,10 +58,10 @@ except FileNotFoundError:
     except NameError: #if run interactively
         dbs = ['./wrangling/twitter.db']
 
-## first time this was ran, did all at once:
+## first time this was ran, did all months at March - current using:
 #months_list = range(3,datetime.datetime.now().month)
 
-## subsequent runs, just do current month
+## all subsequent runs, just do current month
 months_list = [datetime.datetime.now().month]
 
 for month in months_list:
@@ -104,7 +104,8 @@ for month in months_list:
     if file_exists:
         # select rows from df_month that aren't in CSV yet
         df_month = df_month[~df_month.id.isin(pd.read_csv('data/'+filename)['id'].values)]
-        df_month.reset_index(inplace=True,drop=True)
+
+    df_month.reset_index(inplace=True,drop=True)
 
     n = df_month.shape[0]
     for i,row in df_month.iterrows():
@@ -112,10 +113,13 @@ for month in months_list:
         df_month.at[i,'flair'] = flair_score(row['text'])
 
         if i%1000==0:
-            print("row ",i," completed of ",n)
-            break
+             print(df_month.loc[i],'\n') 
+             print("row ",i," completed of ",n)
+            
 
     #include header only if file did not exist, otherwise append
     if file_exists:
+        df_month.to_csv("data/"+filename,mode='a',header=False,index=False)
+    else:
         df_month = pd.concat([pd.read_csv('data/'+filename,usecols=df_month.columns),df_month])
-    df_month.to_csv("data/"+filename,header=True,index=False)
+        df_month.to_csv("data/"+filename,header=True,index=False)
