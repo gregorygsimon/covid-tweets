@@ -58,16 +58,20 @@ except FileNotFoundError:
     except NameError: #if run interactively
         dbs = ['./wrangling/twitter.db']
 
-## first time this was ran, did all months at March - current using:
-#months_list = range(3,datetime.datetime.now().month)
+## first time this is run, processed all months using:
+#months_list = range(1,datetime.datetime.now().month)
 
 ## all subsequent runs, just do current month
 months_list = [datetime.datetime.now().month]
 
+months_list = [8,9,10]
+
+year = datetime.datetime.now().year
+
 for month in months_list:
 
-    first_sec_of_month  = datetime.datetime(2020,month,1,0,0).strftime('%Y-%m-%d %H:%M:%S')
-    last_sec_of_month = (datetime.datetime(2020,month+1,1,0,0)+datetime.timedelta(seconds=-1))\
+    first_sec_of_month  = datetime.datetime(year,month,1,0,0).strftime('%Y-%m-%d %H:%M:%S')
+    last_sec_of_month = (datetime.datetime(year,month+1,1,0,0)+datetime.timedelta(seconds=-1))\
         .strftime('%Y-%m-%d %H:%M:%S')
 
     #initialize blank df for the month
@@ -97,7 +101,7 @@ for month in months_list:
                 ,'state'] = state
         df_month = pd.concat([df_month,df])
 
-    filename = f"sentiments_2020-{str(month).rjust(2,'0')}.csv"
+    filename = f"sentiments_{year}-{str(month).rjust(2,'0')}.csv"
 
     file_exists = filename in os.listdir('data/')
 
@@ -114,12 +118,10 @@ for month in months_list:
 
         if i%1000==0:
              print(df_month.loc[i],'\n') 
-             print("row ",i," completed of ",n)
-            
+             print("row ",i," completed of ",n)            
 
     #include header only if file did not exist, otherwise append
     if file_exists:
         df_month.to_csv("data/"+filename,mode='a',header=False,index=False)
     else:
-        df_month = pd.concat([pd.read_csv('data/'+filename,usecols=df_month.columns),df_month])
         df_month.to_csv("data/"+filename,header=True,index=False)
